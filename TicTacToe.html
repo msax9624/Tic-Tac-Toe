@@ -12,6 +12,7 @@
                 align-items: center;     /* vertical centering */
                 flex-direction: column;  /* stack items vertically */              
             }
+            
             .board {
                 display: grid;
                 grid-template-columns: repeat(3, 100px);
@@ -23,6 +24,7 @@
                 margin: 5px; 
                 margin-top: 45px;
             }
+            
             .cell {
                 display: flex;
                 justify-content: center;
@@ -32,7 +34,7 @@
                 border: 1.5px solid #000;
                 box-sizing: border-box;
             } 
-            .cell:hover {
+            .cell: hover {
                 border: 2px solid #000;
                 background-color: #fff;
                 box-shadow: 0 0 3px rgba(0,0,0,0.2);
@@ -258,7 +260,7 @@
                     })
                 }
             
-            //RESTART GAME
+            //RESTART GAME & START NEW GAME
 
             function restartPage(){
                 location.reload();
