@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Tic-Tac-Toe</title>
+        <style>
+            body {
+                margin: 0;
+                height: 100vh;
+                display: flex;
+                justify-content: center; /* horizontal centering */
+                align-items: center;     /* vertical centering */
+                flex-direction: column;  /* stack items vertically */              
+            }
+            .board {
+                display: grid;
+                grid-template-columns: repeat(3, 100px);
+                grid-template-rows: repeat(3, 100px);
+                width: 300px;  /* (3 * 100px) + 2px  */
+                height: auto;
+                border: 5px solid #7e7e7e;
+                background-color: #f4f4f4;
+                margin: 5px; 
+                margin-top: 45px;
+            }
+            .cell {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 40px;
+                font-weight: 100;
+                border: 1.5px solid #000;
+                box-sizing: border-box;
+            } 
+            .cell:hover {
+                border: 2px solid #000;
+                background-color: #fff;
+                box-shadow: 0 0 3px rgba(0,0,0,0.2);
+            }
+
+            .cell.winning-cell {
+                background-color: #e5efe5; /* light green */
+                border: 2px solid #2e8b57;
+                box-shadow: 0 0 5px rgba(0, 0, 15, 0.6);
+            }
+
+
+            #turn-player1,
+            #turn-player2 {
+                font-size: 25px;
+                font-weight: 500;
+                color: #000000da;
+
+            }
+            #stalemate-alert-msg,
+            #alert-msg {
+                font-size: 22px;
+                font-weight: 500;
+                text-decoration: .5px underline;
+                color: #000;
+            }
+            
+            .restart-button {
+                background-color: #f4f4f4;
+                font-size: 16px;
+                font-weight: 400;
+                border: 1.5px solid #aca6a6;
+                padding: 5px;
+                margin-top: 50px;
+                border-radius: 5px;
+            }
+            .restart-button:hover {
+                background-color: #fff;
+                font-weight: 500;
+                border: 1.5px solid #000;
+                box-shadow: 0 0 3px rgba(0,0,0,0.2);
+            }
+
+            .dialougeBox {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                background-color: transparent;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+            .dialougeBoxContent {
+                background-color: #fff;
+                padding: 20px 30px;
+                border-radius: 8px;
+                text-align: center;
+                box-shadow: 0 0 8px rgba(0,0,0,0.2);
+                border: 1.5px solid #000000;
+            }
+
+
+        </style>
+        <script>
+            window.onload = function firstAlert () {
+                const welcomeMsg = document.getElementById("welcome-msg")
+                alert(welcomeMsg.innerText);
+            }           
+        </script>
+    </head>
+    <body>
+        <div id="welcome-msg" style ="display: none;">
+            <p>Hello, Welcome to Tic-Tac Toe!</p>
+            
+            <p>Here are the rules:
+                1. Player 1 will use the "X" marker & Player 2 will use the
+                   "O" marker. 
+                2. Each player alternates turns by selecting a cell & typing 
+                   X" or "O" to mark their cells 
+                3. The first player to achieve 3 "X"s or "O"s in a row [up/
+                   down, across, or diagonally] will win!
+            </p>
+            <p>Enjoy the Game!</p>
+        </div>
+        <div class="turns">
+            <h3 id="turn-player1" > It's Player 1's Turn!</h3>
+            <h3 id="turn-player2" style="display: none;" > Player 2's Turn!</h3>
+        </div>
+        <div class="board">
+            <div class="cell" onclick="cellSelect(this)"></div>
+            <div class="cell" onclick="cellSelect(this)"></div> 
+            <div class="cell" onclick="cellSelect(this)"></div> 
+            <div class="cell" onclick="cellSelect(this)"></div> 
+            <div class="cell" onclick="cellSelect(this)"></div> 
+            <div class="cell" onclick="cellSelect(this)"></div> 
+            <div class="cell" onclick="cellSelect(this)"></div> 
+            <div class="cell" onclick="cellSelect(this)"></div> 
+            <div class="cell" onclick="cellSelect(this)"></div>           
+        </div>
+            <button class="restart-button" onclick="restartPage()" >Restart Game</button>
+        </div>
+        <div id="end-alert" style="display: none;" class="dialougeBox">
+            <div class="dialougeBoxContent">
+                <p id="alert-msg"></p>
+                <button class="restart-button" onclick="restartPage()" >Start New Game!</button>
+            </div>
+        </div>
+        <div id="stalemate-alert" style="display: none;" class="dialougeBox">
+            <div class="dialougeBoxContent">
+                <p id="stalemate-alert-msg"></p>
+                <button class="restart-button" onclick="restartPage()" >Start New Game!</button>
+            </div>
+        </div>
+        <script> 
+
+            let currentPlayer = 'Player 1';
+            
+            // IF CELL HAS SYMBOL, DO NOTHING (STOP FROM CHANGING MOVES)
+
+            function cellSelect(cellElement) {
+                if (cellElement.innerHTML !== '') {
+                    return;
+                }
+
+                // PLAYER SYMBOL ASSIGNMENT 
+
+                const playerSymbol = currentPlayer === 'Player 1' ? 'X' : 'O';
+                    cellElement.innerHTML = playerSymbol; 
+                    
+                // CHECK WINNER OR STALEMATE & DISABLE BOARD/TURNS (W/TIMEOUT TO SHOW LAST MOVE)
+                const winningCombo = checkWinner(playerSymbol);
+
+                if (winningCombo) {
+                    // Add the highlight class to winning cells
+                    winningCombo.forEach(index => {
+                        cells[index].classList.add("winning-cell");
+                    });
+
+                    setTimeout(() => {
+                        showCustomAlert(`${currentPlayer} wins!`);
+                    }, 50);
+
+                    stopBoard();
+                    return;
+                } else if (checkStalemate(cells)) {
+                    setTimeout(() => {
+                        showStalemateAlert();
+                    }, 50);
+                    stopBoard();
+                    return; 
+                }
+
+                // ALERT MSGS FOR WINNING & STALEMATE
+
+                function showCustomAlert(message) {
+                    document.getElementById("turn-player1").style.display = "none";
+                    document.getElementById("turn-player2").style.display = "none";
+                    
+                    document.querySelector(".restart-button").style.display = "none";
+                   
+                    document.getElementById("alert-msg").innerText = message;
+                    document.getElementById("end-alert").style.display = "flex";
+                }
+
+                function showStalemateAlert() {
+                   document.getElementById("turn-player1").style.display = "none";
+                   document.getElementById("turn-player2").style.display = "none"; 
+
+                   document.querySelector(".restart-button").style.display = "none";
+                   
+                   const stalemateMsg = document.getElementById('stalemate-alert-msg');
+                   stalemateMsg.innerText = "It's a stalemate! No more moves to play.";
+                   document.getElementById("stalemate-alert").style.display= "flex";
+                }
+            
+
+                // ALTERNATE PLAYER (DISPLAY & TURN)
+
+                if (currentPlayer == 'Player 1') {
+                    currentPlayer = 'Player 2';
+                    document.getElementById("turn-player1").style.display = "none";
+                    document.getElementById("turn-player2").style.display = "block";
+                } else {
+                    currentPlayer = 'Player 1';
+                    document.getElementById("turn-player2").style.display = "none";
+                    document.getElementById("turn-player1").style.display = "block";
+                } 
+            
+            }
+
+            // WIN METHODS & CHECK WINNER
+
+            const cells = document.getElementsByClassName("cell");
+            
+            function checkWinner(symbol) {
+                const winMethods = [
+                    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+                    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+                    [0, 4, 8], [2, 4, 6]            // Diagonals
+                ];
+
+                for (let method of winMethods) {
+                    if (method.every(index => cells[index].innerHTML === symbol)) {
+                        return method; // Return the winning combination
+                    }
+                }
+                return null;
+            }
+
+
+            // PLAYER STALEMATE 
+            
+            function checkStalemate(cells) {
+                return Array.from(cells).every(cell => cell.innerHTML !== '');
+            }
+
+            // DISABLE BOARD 
+                
+            function stopBoard() {
+                    Array.from(cells).forEach(cell => {
+                        cell.onclick = null;
+                    })
+                }
+            
+            //RESTART GAME
+
+            function restartPage(){
+                location.reload();
+            }; 
+
+        </script>
+    </body>
+</html>
